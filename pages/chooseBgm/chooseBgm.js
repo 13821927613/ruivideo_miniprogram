@@ -53,7 +53,7 @@ Page({
             title: '正在上传',
         });
         wx.uploadFile({
-            url: server + '/video/upload',
+            url: server + '/video/uploadVideo',
             formData: {
                 userId: user.id,
                 bgmId: bgmId,
@@ -69,13 +69,31 @@ Page({
             },
             success(res) {
                 var data = JSON.parse(res.data);
+                var videoId = data.data;
+                wx.hideLoading();
                 if (data.status == 200) {
-                    wx.hideLoading();
-                    wx.showToast({
-                        title: '上传成功',
-                        icon: 'success',
-                        duration: 3000
-                    });
+                    wx.uploadFile({
+                      filePath: tempCoverUrl,
+                      name: 'file',
+                      url: server + '/video/uploadCover',
+                      header: {
+                        'content-type': 'application/json'
+                      },
+                      formData: {
+                        userId: user.id,
+                        videoId: videoId
+                      },
+                      success(res) {
+                        wx.showToast({
+                          title: '上传成功',
+                          icon: 'success',
+                          duration: 3000
+                        });
+                        wx.navigateBack({
+                          delta: 1,
+                        })
+                      }
+                    })
                 } else if (data.status == 500) {
                     wx.hideLoading();
                     wx.showToast({
